@@ -5,11 +5,9 @@ from urllib import parse
 from urllib import request
 from urllib.error import URLError
 import pytesseract
-
 from PIL import Image, ImageEnhance
 
-
-def getCode():
+def getValidCode():
     url = "http://ded.nuaa.edu.cn/mss/Account/Vcode/signinid"
     user_agent = r'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'
     headers = {'User-Agent': user_agent, 'Connection': 'keep-alive',
@@ -44,8 +42,8 @@ def SaveCookie(usr,pwd):       #保存在cookie.txt
     headers = {'User-Agent': user_agent, 'Connection': 'keep-alive','Accept':'image/webp,image/apng,image/*,*/*;q=0.8'}
 
     code = input("请输入验证码:")
-
-    data = urllib.parse.urlencode({'VCodeId': 'signinid', 'UserName':'161540208','Password':'St106012','VaildCode':code,'RememberMe':'true'})
+    #code = Distinguish()
+    data = urllib.parse.urlencode({'VCodeId': 'signinid', 'UserName':usr,'Password':pwd,'VaildCode':code,'RememberMe':'true'})
     data = data.encode('utf-8')
     try:
         request = urllib.request.Request(loginUrl,data=data,headers=headers)  # 构造包含headers的request
@@ -54,7 +52,7 @@ def SaveCookie(usr,pwd):       #保存在cookie.txt
     except URLError as e:
         print(e)
 
-def Login(usr):
+def LoginWithCookie(usr):
     cookie_filename = 'cookie.txt'
     cookie = http.cookiejar.MozillaCookieJar(cookie_filename)
     cookie.load(cookie_filename, ignore_discard=True, ignore_expires=True)  # 加载cookie
@@ -74,7 +72,8 @@ def Login(usr):
     try:
         get_request = urllib.request.Request(get_url, headers=headers)
         get_response = opener.open(get_request)
-        print(get_response.read().decode('utf-8'))
+        # print(get_response.read().decode('utf-8'))
+        return get_response
     except URLError as e:
         print(e)
 
@@ -87,10 +86,10 @@ def Distinguish():
     sharpness = ImageEnhance.Contrast(imgry)
     sharp_img = sharpness.enhance(2.0)
     text = pytesseract.image_to_string(sharp_img)
-    print(text)
-if getCode() == 1:
-    Distinguish()
-# if getCode() == 1:
-#     SaveCookie('161540208','St106012')
-#     Login('161540208')
+    return text
+
+def LoginMain(usr,pwd):
+    if getValidCode() == 1:
+        SaveCookie(usr, pwd)
+        return LoginWithCookie(usr)
 

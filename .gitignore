@@ -103,3 +103,6 @@ ENV/
 *.jpg
 cookie.txt
 .idea/
+Index_files/
+*.html
+*.ini
