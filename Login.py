@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import http.cookiejar
 import urllib
-from urllib import parse
-from urllib import request
+from urllib import *
 from urllib.error import URLError
 import pytesseract
 from PIL import Image, ImageEnhance
+from bs4 import BeautifulSoup
 
 def getValidCode():
     url = "http://ded.nuaa.edu.cn/mss/Account/Vcode/signinid"
@@ -89,7 +89,14 @@ def Distinguish():
     return text
 
 def LoginMain(usr,pwd):
-    if getValidCode() == 1:
-        SaveCookie(usr, pwd)
-        return LoginWithCookie(usr)
+    html = LoginWithCookie(usr)
+    soup = BeautifulSoup(html, "html.parser")
+    len = soup.findAll('input').__len__()           # len大于1说明没有登陆成功，cookie失效，需要重新登陆
+    if len > 1:
+        if getValidCode() == 1:
+             SaveCookie(usr, pwd)
+             return LoginWithCookie(usr)
+    else:
+        return html
+
 
