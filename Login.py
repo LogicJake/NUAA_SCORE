@@ -4,7 +4,10 @@ import urllib
 from urllib import parse
 from urllib import request
 from urllib.error import URLError
-import time
+import pytesseract
+
+from PIL import Image, ImageEnhance
+
 
 def getCode():
     url = "http://ded.nuaa.edu.cn/mss/Account/Vcode/signinid"
@@ -22,7 +25,7 @@ def getCode():
         cookie.save(ignore_discard=True, ignore_expires=True)  # 保存cookie到cookie.txt中
     except URLError as e:
         print(e)
-    fhand = open('code.jpg','wb')
+    fhand = open('code.png','wb')
     while True:
         info = response.read(100000)
         if len(info) < 1: break
@@ -75,7 +78,19 @@ def Login(usr):
     except URLError as e:
         print(e)
 
+def Distinguish():
+    pytesseract.pytesseract.tesseract_cmd = r'D:\Programme\Tesseract-OCR\tesseract.exe'
+    image = Image.open('code.png')
+    imgry = image.convert('L')
+    # 保存图像
+    imgry.save('g' + 'code.jpg')
+    sharpness = ImageEnhance.Contrast(imgry)
+    sharp_img = sharpness.enhance(2.0)
+    text = pytesseract.image_to_string(sharp_img)
+    print(text)
 if getCode() == 1:
-    SaveCookie('161540208','St106012')
-    Login('161540208')
+    Distinguish()
+# if getCode() == 1:
+#     SaveCookie('161540208','St106012')
+#     Login('161540208')
 
