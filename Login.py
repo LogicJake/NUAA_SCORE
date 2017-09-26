@@ -87,7 +87,7 @@ def Distinguish():
     imgry = image.convert('L')
     sharpness = ImageEnhance.Contrast(imgry)
     sharp_img = sharpness.enhance(2.0)
-    text = pytesseract.image_to_string(sharp_img,lang='nuaa')
+    text = pytesseract.image_to_string(sharp_img,lang='nuaa') #自己训练的语言字典 nuaa
     return text
 
 def LoginMain(usr,pwd):
