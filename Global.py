@@ -10,6 +10,7 @@ def _init():#初始化
     _global_dict['mail'] = lines[2].replace('\n', '').strip()
     _global_dict['qq'] = lines[3].replace('\n', '').strip()
     _global_dict['mailpwd'] = lines[4].replace('\n', '').strip()
+    _global_dict['path'] = lines[5].replace('\n', '').strip()
 
 
 def set_value(key,value):

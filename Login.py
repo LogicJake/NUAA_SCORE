@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import http.cookiejar
 import urllib
-from urllib import *
 from urllib.error import URLError
+
+import os
 import pytesseract
 from PIL import Image, ImageEnhance
 from bs4 import BeautifulSoup
+import Global
 
 def getValidCode():
     url = "http://ded.nuaa.edu.cn/mss/Account/Vcode/signinid"
@@ -41,8 +43,8 @@ def SaveCookie(usr,pwd):       #保存在cookie.txt
     user_agent = r'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'
     headers = {'User-Agent': user_agent, 'Connection': 'keep-alive','Accept':'image/webp,image/apng,image/*,*/*;q=0.8'}
 
-    code = input("请输入验证码:")
-    #code = Distinguish()
+    #code = input("请输入验证码:")        #人工识别
+    code = Distinguish()                   #tesseract识别
     data = urllib.parse.urlencode({'VCodeId': 'signinid', 'UserName':usr,'Password':pwd,'VaildCode':code,'RememberMe':'true'})
     data = data.encode('utf-8')
     try:
@@ -54,6 +56,8 @@ def SaveCookie(usr,pwd):       #保存在cookie.txt
 
 def LoginWithCookie(usr):
     cookie_filename = 'cookie.txt'
+    if os.path.exists(cookie_filename) == False:            #不存在cookie文件
+        return 0
     cookie = http.cookiejar.MozillaCookieJar(cookie_filename)
     cookie.load(cookie_filename, ignore_discard=True, ignore_expires=True)  # 加载cookie
     handler = urllib.request.HTTPCookieProcessor(cookie)
@@ -78,24 +82,32 @@ def LoginWithCookie(usr):
         print(e)
 
 def Distinguish():
-    pytesseract.pytesseract.tesseract_cmd = r'D:\Programme\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = Global.get_value('path')
     image = Image.open('code.png')
     imgry = image.convert('L')
-    # 保存图像
-    imgry.save('g' + 'code.jpg')
     sharpness = ImageEnhance.Contrast(imgry)
     sharp_img = sharpness.enhance(2.0)
-    text = pytesseract.image_to_string(sharp_img)
+    text = pytesseract.image_to_string(sharp_img,lang='nuaa')
     return text
 
 def LoginMain(usr,pwd):
+    num = 0
     html = LoginWithCookie(usr)
-    soup = BeautifulSoup(html, "html.parser")
-    len = soup.findAll('input').__len__()           # len大于1说明没有登陆成功，cookie失效，需要重新登陆
+    if html == 0:
+        len = 7
+    else:
+        soup = BeautifulSoup(html, "html.parser")
+        len = soup.findAll('input').__len__()  # len大于1说明没有登陆成功，继续尝试
     if len > 1:
-        if getValidCode() == 1:
-             SaveCookie(usr, pwd)
-             return LoginWithCookie(usr)
+        while 1:
+            if getValidCode() == 1:
+                SaveCookie(usr, pwd)
+                html = LoginWithCookie(usr)
+                soup = BeautifulSoup(html, "html.parser")
+                len = soup.findAll('input').__len__()  # len大于1说明没有登陆成功，继续尝试
+                num += 1
+                if len <= 1:
+                    break
     else:
         return html
 
