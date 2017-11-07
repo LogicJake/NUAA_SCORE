@@ -1,3 +1,4 @@
+详细说明:https://www.logicjake.xyz/?p=81
 # NUAA_SCORE
 验证码获取地址：http://ded.nuaa.edu.cn/mss/Account/Vcode/signinid  
 登陆地址：http://ded.nuaa.edu.cn/mss/Account/SignIn
